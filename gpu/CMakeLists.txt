@@ -1,0 +1,8 @@
+cmake_minimum_required(VERSION 3.7)
+project(mandelbrot-gpu)
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+find_package(CUDA REQUIRED)
+cuda_add_executable(mandelbrot-gpu ../main.cpp)
+set_source_files_properties(../main.cpp PROPERTIES CUDA_SOURCE_PROPERTY_FORMAT OBJ)
