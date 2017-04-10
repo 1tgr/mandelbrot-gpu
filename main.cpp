@@ -81,8 +81,8 @@ static __global__ void mandel_kernel(char *image, int width, int height) {
 #endif
 
 int main() {
-    const auto width = 640;
-    const auto height = 480;
+    const auto width = 8400;
+    const auto height = 4800;
     auto image = std::vector<char>(width * height * 3);
 
 #ifdef __NVCC__
