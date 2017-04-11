@@ -1,18 +1,12 @@
-#include <algorithm>
+#pragma once
+
 #include <math.h>
-#include <stdio.h>
-#include <vector>
 
 #if __NVCC__
-#include "thrust/device_vector.h"
-#include "thrust/host_vector.h"
 #define DEVICE __device__
 #else
 #define DEVICE
 #endif
-
-#define STB_IMAGE_WRITE_IMPLEMENTATION
-#include "stb/stb_image_write.h"
 
 static DEVICE void image_to_viewport(
     int image_width,
@@ -70,37 +64,3 @@ template<typename T> static DEVICE void mandel(T& image, int image_width, int im
     image[offset] = image[offset + 1] = image[offset + 2] = iteration;
 }
 
-#ifdef __NVCC__
-static __global__ void mandel_kernel(char *image, int width, int height) {
-    auto x = blockIdx.x * blockDim.x + threadIdx.x;
-    auto y = blockIdx.y * blockDim.y + threadIdx.y;
-    if (x < width && y < height) {
-        mandel(image, width, height, x, y);
-    }
-}
-#endif
-
-int main() {
-    const auto width = 8400;
-    const auto height = 4800;
-    auto image = std::vector<char>(width * height * 3);
-
-#ifdef __NVCC__
-    printf("Using GPU\n");
-    dim3 blockDim(16, 16, 1);
-    dim3 gridDim((width + blockDim.x - 1) / blockDim.x, (height + blockDim.y - 1) / blockDim.y, 1);
-    auto device_image = thrust::device_vector<char>(image.capacity());
-    mandel_kernel<<<gridDim, blockDim, 0>>>(thrust::raw_pointer_cast(&device_image[0]), width, height);
-    thrust::copy(device_image.begin(), device_image.end(), image.begin());
-#else
-    printf("Using CPU\n");
-    for (auto y = 0; y < height; y++) {
-        for (auto x = 0; x < width; x++) {
-            mandel(image, width, height, x, y);
-        }
-    }
-#endif
-
-    stbi_write_png("image.png", width, height, 3, &image[0], width * 3);
-    return 0;
-}
